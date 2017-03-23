@@ -3,7 +3,7 @@ FROM openjdk:8-jdk
 MAINTAINER Luis David Barrios Alfonso (luisdavid.barrios@agsnasoft.com / cyberluisda@gmail.com)
 
 #install ivy
-RUN apt-get update && apt-get install ivy && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y ivy gawk && rm -rf /var/lib/apt/lists/*
 
 ENV FLUME_VERSION 1.7.0
 ADD http://apache.rediris.es/flume/${FLUME_VERSION}/apache-flume-${FLUME_VERSION}-bin.tar.gz /usr/var/lib/
@@ -25,6 +25,8 @@ ADD files/flume-env.sh /usr/var/lib/flume/conf
 
 RUN mkdir -p /etc/flume /var/log/flume /var/flume/sources /var/flume/extra-libs
 VOLUME /etc/flume /var/flume/ingestion /var/flume/sources /var/flume/extra-libs
+
+COPY files/parametrize.awk /usr/var/lib/flume/bin
 
 ENTRYPOINT ["entry_point.sh"]
 CMD ["--help"]
