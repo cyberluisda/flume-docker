@@ -1,5 +1,5 @@
 <ivy-module version="2.0">
-    <info organisation="com.ericsson.ivi" module="kitesdk-deps"/>
+    <info organisation="cyberluisda" module="kitesdk-deps"/>
     <configurations defaultconfmapping="default"/>
     <dependencies>
         <dependency org="org.kitesdk" name="kite-morphlines-all" rev="1.1.0" />

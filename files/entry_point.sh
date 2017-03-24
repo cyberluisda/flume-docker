@@ -71,8 +71,12 @@ then
   then
     LOGFILECONFIG="-Dlog4j.configuration=file://$TEMPDIR/$AGENTNAME-log4j.properties"
   else
-      LOGLEVEL="-Dflume.root.logger=$DEFAULTLOGLEVEL,console"
+    LOGFILECONFIG="-Dlog4j.configuration=file:///usr/var/lib/flume/conf/log4j.properties"
+    LOGLEVEL="-Dflume.root.logger=$DEFAULTLOGLEVEL,console"
   fi
+
+  # Trap signal to remove temp path
+  trap "rm -fr ${TEMPDIR}; exit" SIGHUP SIGINT SIGTERM
 
   flume-ng agent --classpath /var/flume/extra-libs/\*:/usr/var/lib/flume/extra-libs/\* --conf $TEMPDIR --conf-file $TEMPDIR/agent-$AGENTNAME.conf --name $AGENTNAME $LOGFILECONFIG $LOGLEVEL $@
 else
