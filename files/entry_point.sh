@@ -5,7 +5,7 @@
 ME=$(basename $0)
 
 function use() {
-  echo -e "$ME [--parametrize] agent-name"
+  echo -e "$ME [--parametrize [-e name1=value1 ... -e nameN=valueN] ] agent-name"
   echo -e "\t where agent-name is the agent to be executed."
   echo ""
   echo -e "\t The configuraton file expected is /etc/flume/agent-<agent-name>.conf"
@@ -26,6 +26,9 @@ function use() {
   echo ""
   echo -e "\t\t \$curl\$var.name=\$localname\$url : Content of \"url\" will be downladed and saved in a file called \"localname\" "
   echo -e "\t\t\t all \${var.name} occurences will be replaced by localname full-path on *<agent-names>* files"
+  echo
+  echo -e "\t You can use -e nameX=valueX to add (on top of) on-fly vars and values (with format previously described) to content"
+  echo -e "\t loaded from /etc/flume/params-<agent-name>.conf"
 }
 
 if [ "$1" == "--help" ]
@@ -34,11 +37,28 @@ then
   exit 0
 fi
 
+echo "ARGS: $@"
+
 PARAMETRIZE="no"
+ONFLYVARS=""
 if [ "$1" == "--parametrize" ]
 then
   PARAMETRIZE="yes"
   shift
+
+  #EXTRACT ONFLYVARS
+  while [ "$1" == "-e" ]
+  do
+    if [ -z "$2" ]
+    then
+      echo "-e definition without value"
+      use
+      exit 1
+    fi
+    ONFLYVARS="${ONFLYVARS}$2\n"
+    shift 2
+  done
+
 fi
 
 if [ -z "$1" ]; then
@@ -77,7 +97,12 @@ then
   TEMPDIR=$(mktemp -d)
   cp -rpv /etc/flume/*$AGENTNAME* $TEMPDIR/
   files=$(find $TEMPDIR/ -type f | fgrep -v params-$AGENTNAME.conf | xargs echo)
-  cat /etc/flume/params-$AGENTNAME.conf | awk -v files="$files" -v path="$TEMPDIR" -f /usr/var/lib/flume/bin/parametrize.awk > $TEMPDIR/presetup.sh
+  touch $TEMPDIR/onflyvars
+  if [ -n "$ONFLYVARS" ]
+  then
+    echo -e "$ONFLYVARS" > $TEMPDIR/onflyvars
+  fi
+  cat $TEMPDIR/onflyvars /etc/flume/params-$AGENTNAME.conf | egrep -ve "^$" | awk -v files="$files" -v path="$TEMPDIR" -f /usr/var/lib/flume/bin/parametrize.awk > $TEMPDIR/presetup.sh
   chmod a+x $TEMPDIR/presetup.sh
   $TEMPDIR/presetup.sh
 
