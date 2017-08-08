@@ -1,5 +1,6 @@
 #!/bin/bash
 # Starts flume agent based on name
+set -e
 
 #GLOBAL and DEFAULT vars
 ME=$(basename $0)
