@@ -4,36 +4,38 @@
 #GLOBAL and DEFAULT vars
 ME=$(basename $0)
 
-function use() {
-  echo -e "$ME [--parametrize [-e name1=value1 ... -e nameN=valueN] ] agent-name"
-  echo -e "\t where agent-name is the agent to be executed."
-  echo ""
-  echo -e "\t The configuraton file expected is /etc/flume/agent-<agent-name>.conf"
-  echo ""
-  echo -e "\t Custom log4.properties file can be specified in /etc/ingestion/<agent-name>-log4j.properties"
-  echo ""
-  echo -e "\t if --parametrize is enabled (present) we look for /etc/flume/params-<agent-name>.conf and it will be"
-  echo -e "\t used to replace values into /etc/flume/*<agent-name>* files (except params-<agent-name>.conf)"
-  echo -e "\t files on /etc/flume/* will not be edited, instead changed files will be saved in temporal path"
-  echo -e "\t and flume executable will be pointed to this configuration."
-  echo ""
-  echo -e "\t Format of each line of params-<agent-name>.conf is:"
-  echo ""
-  echo -e "\t\t var.name=VALUE : all \${var.name} occurences will be replaced by VALUE on *<agent-name>* files"
-  echo -e "\t\t\t Special value \"__path__\" can be used. In this case __path__ will be replaced by effective configuration path."
-  echo -e "\t\t\t \"Effective configuration path\" is temporal directory where files after parametrizacion are saved"
-  echo ""
-  echo ""
-  echo -e "\t\t \$curl\$var.name=\$localname\$url : Content of \"url\" will be downladed and saved in a file called \"localname\" "
-  echo -e "\t\t\t all \${var.name} occurences will be replaced by localname full-path on *<agent-names>* files"
-  echo
-  echo -e "\t You can use -e nameX=valueX to add (on top of) on-fly vars and values (with format previously described) to content"
-  echo -e "\t loaded from /etc/flume/params-<agent-name>.conf"
+function usage() {
+  cat << EOF
+  $ME [--parametrize [-e name1=value1 ... -e nameN=valueN] ] agent-name
+  	 where agent-name is the agent to be executed.
+
+  	 The configuraton file expected is /etc/flume/agent-<agent-name>.conf
+
+  	 Custom log4.properties file can be specified in /etc/ingestion/<agent-name>-log4j.properties
+
+  	 if --parametrize is enabled (present) we look for /etc/flume/params-<agent-name>.conf and it will be
+  	 used to replace values into /etc/flume/*<agent-name>* files (except params-<agent-name>.conf)
+  	 files on /etc/flume/* will not be edited, instead changed files will be saved in temporal path
+  	 and flume executable will be pointed to this configuration.
+
+  	 Format of each line of params-<agent-name>.conf is:
+
+  		 var.name=VALUE : all \${var.name} occurences will be replaced by VALUE on *<agent-name>* files
+  			 Special value "__path__" can be used. In this case __path__ will be replaced by effective configuration path.
+  			 "Effective configuration path" is temporal directory where files after parametrizacion are saved
+
+
+  		 \$curl\$var.name=\$localname\$url : Content of \"url\" will be downladed and saved in a file called "localname"
+  			 all \${var.name} occurences will be replaced by localname full-path on *<agent-names>* files
+
+  	 You can use -e nameX=valueX to add (on top of) on-fly vars and values (with format previously described) to content
+  	 loaded from /etc/flume/params-<agent-name>.conf
+EOF
 }
 
 if [ "$1" == "--help" ]
 then
-  use
+  usage
   exit 0
 fi
 
@@ -52,7 +54,7 @@ then
     if [ -z "$2" ]
     then
       echo "-e definition without value"
-      use
+      usage
       exit 1
     fi
     ONFLYVARS="${ONFLYVARS}$2\n"
@@ -62,7 +64,7 @@ then
 fi
 
 if [ -z "$1" ]; then
-  use
+  usage
   exit 1
 fi
 AGENTNAME="$1"
@@ -78,7 +80,7 @@ fi
 
 if [ ! -f "/etc/flume/agent-$AGENTNAME.conf" ]; then
   echo -e "ERROR: I can not find file /etc/flume/agent-$AGENTNAME.conf \n\n"
-  use
+  usage
   exit 1
 fi
 
