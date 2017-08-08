@@ -3,6 +3,9 @@
 
 #GLOBAL and DEFAULT vars
 ME=$(basename $0)
+#Only for listed here.
+WAIT_FOR_SERVICE_UP="${WAIT_FOR_SERVICE_UP}"
+WAIT_FOR_SERVICE_UP_TIMEOUT="${WAIT_FOR_SERVICE_UP_TIMEOUT:-10s}"
 
 function usage() {
   cat << EOF
@@ -30,6 +33,20 @@ function usage() {
 
   	 You can use -e nameX=valueX to add (on top of) on-fly vars and values (with format previously described) to content
   	 loaded from /etc/flume/params-<agent-name>.conf
+
+     ENVIRONMENT CONFIGURATION.
+      There are some configuration and behaviours that can be set using next Environment
+      Variables:
+          WAIT_FOR_SERVICE_UP. If it is defined we wait (using dockerize) for service(s)
+            to be started before to perform any operation. Example values:
+            WAIT_FOR_SERVICE_UP="http://server" wait for http connection to server
+            are available
+            WAIT_FOR_SERVICE_UP="tcp://kafka:9092 tcp://zookeeper:2181" Wait for
+            kafka:9092 and zookeeper:2818 connections are avilable.
+            If one of this can not be process will exit with error. See
+            https://github.com/jwilder/dockerize for more information.
+          WAIT_FOR_SERVICE_UP_TIMEOUT. Set timeot when check services listed on
+            WAIT_FOR_SERVICE_UP. Current value $WAIT_FOR_SERVICE_UP_TIMEOUT
 EOF
 }
 
@@ -92,6 +109,16 @@ else
   LOGLEVEL="-Dflume.root.logger=$DEFAULTLOGLEVEL,console"
 fi
 
+# Wait for services if enabled.
+if [ -n "$WAIT_FOR_SERVICE_UP" ]; then
+  services=""
+  #Set -wait option to use with docerize
+  for service in $WAIT_FOR_SERVICE_UP; do
+    services="$services -wait $service"
+  done
+  echo "Waiting till services $WAIT_FOR_SERVICE_UP are accessible (or timeout: $WAIT_FOR_SERVICE_UP_TIMEOUT)"
+  dockerize $services -timeout "$WAIT_FOR_SERVICE_UP_TIMEOUT"
+fi
 
 #RUN command
 if [ "$PARAMETRIZE" == "yes" ]
