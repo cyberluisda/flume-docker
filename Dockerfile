@@ -28,5 +28,10 @@ VOLUME /etc/flume /var/flume/ingestion /var/flume/sources /var/flume/extra-libs
 
 COPY files/parametrize.awk /usr/var/lib/flume/bin
 
+#Add dockerize tool
+ENV DOCKERIZE_VERSION v0.5.0
+RUN curl -L https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSION/dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz \
+| tar -C /usr/local/bin -xzvf -
+
 ENTRYPOINT ["entry_point.sh"]
 CMD ["--help"]
