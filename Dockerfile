@@ -1,4 +1,4 @@
-FROM openjdk:8-jdk
+FROM cyberluisda/openjdk:8
 
 MAINTAINER Luis David Barrios Alfonso (luisdavid.barrios@agsnasoft.com / cyberluisda@gmail.com)
 
