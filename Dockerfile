@@ -7,7 +7,6 @@ RUN apt-get update && apt-get install -y ivy gawk && rm -rf /var/lib/apt/lists/*
 
 ENV FLUME_VERSION 1.7.0
 ADD http://apache.rediris.es/flume/${FLUME_VERSION}/apache-flume-${FLUME_VERSION}-bin.tar.gz /usr/var/lib/
-RUN cd /usr/var/lib/ && tar -zxvf apache-flume-${FLUME_VERSION}-bin.tar.gz > /dev/null && rm -f apache-flume-${FLUME_VERSION}-bin.tar.gz && cd - > /dev/null
 RUN mv /usr/var/lib/apache-flume-1.7.0-bin /usr/var/lib/flume
 
 ENV PATH /usr/var/lib/flume/bin:$PATH
