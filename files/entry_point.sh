@@ -89,7 +89,7 @@ LOGLEVEL=""
 if [ -f "/etc/flume/$AGENTNAME-log4j.properties" ]; then
   LOGFILECONFIG="-Dlog4j.configuration=file:///etc/flume/$AGENTNAME-log4j.properties"
 else
-    LOGLEVEL="-Dflume.root.logger=$DEFAULTLOGLEVEL,console"
+  LOGLEVEL="-Dflume.root.logger=$DEFAULTLOGLEVEL,console"
 fi
 
 
